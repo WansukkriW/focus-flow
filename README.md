@@ -4,9 +4,7 @@
 
 **Pomodoro คืออะไร?** ทำงานแบบโฟกัส 25 นาที แล้วพัก 5 นาที ทำครบ 4 รอบได้พักยาว ช่วยให้ทำงานได้นานโดยไม่ล้า
 
-| จับเวลา | รายการงาน | สถิติ | ตั้งค่า |
-|:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/timer.png" width="200" alt="หน้าจับเวลา"> | <img src="docs/screenshots/tasks.png" width="200" alt="หน้ารายการงาน"> | <img src="docs/screenshots/stats.png" width="200" alt="หน้าสถิติ"> | <img src="docs/screenshots/settings.png" width="200" alt="หน้าตั้งค่า"> |
+<p align="center"><img src="docs/screenshots/timer.png" width="320" alt="หน้าจับเวลาแบบนาฬิกาทราย"></p>
 
 ## ดาวน์โหลด
 
