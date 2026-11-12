@@ -6,7 +6,7 @@
 
 ## ดาวน์โหลด
 
-1. ไปที่หน้า [**Releases**](../../releases/latest) แล้วโหลดไฟล์ `Focus Flow Setup x.x.x.exe`
+1. ไปที่หน้า [**Releases**](../../releases/latest) แล้วโหลดไฟล์ `Focus.Flow.Setup.x.x.x.exe`
 2. ดับเบิลคลิกเพื่อติดตั้ง
 3. ถ้า Windows ขึ้นจอสีน้ำเงินว่า "Windows protected your PC" ให้กด **More info** → **Run anyway**
    (เพราะแอปไม่ได้ซื้อใบรับรองดิจิทัล ไม่ใช่ไวรัส)
