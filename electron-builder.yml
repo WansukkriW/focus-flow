@@ -1,0 +1,49 @@
+appId: com.fickeryook.focusflow
+productName: Focus Flow
+copyright: Copyright © 2026 fickeryook
+directories:
+  buildResources: build
+  output: dist
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!scripts/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,spec.md,CLAUDE.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - 'resources/**'
+win:
+  executableName: focus-flow
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  # A normal "Next, Next, Install" wizard rather than a silent one-click install.
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  artifactName: ${productName} Setup ${version}.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  # Keep settings, tasks and history if the app is uninstalled and installed again.
+  deleteAppDataOnUninstall: false
+npmRebuild: false
+# Lock down the Electron binary so focus-flow.exe can't be reused to run arbitrary Node code.
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableCookieEncryption: true
+  # Refuse to start if app.asar was modified, and never load the app from loose files.
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  # Left on: the page is loaded from file:// and its module scripts and fonts need it.
+  grantFileProtocolExtraPrivileges: true

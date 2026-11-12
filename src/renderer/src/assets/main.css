@@ -1,0 +1,1105 @@
+/* Defaults match the Midnight theme; applyTheme() overrides them at runtime. */
+:root {
+  --bg: #0b0d14;
+  --surface: rgba(21, 24, 36, 0.72);
+  --surface-solid: #151824;
+  --border: #ffffff14;
+  --text: #eef0f7;
+  --text-muted: #a9b0c3;
+  --accent: #7c9cff;
+  --accent-soft: rgba(124, 156, 255, 0.16);
+  --on-accent: #0b0d14;
+  --aurora-a: #3046c9;
+  --aurora-b: #6d28d9;
+  --focus: #ff6b81;
+  --short-break: #4fd1b5;
+  --long-break: #8b7cf6;
+  --on-phase: #0b0d14;
+  --phase: var(--focus);
+
+  --radius: 16px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --color-fade: 1.2s ease;
+  --resize: 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans Thai', 'Leelawadee UI', 'Segoe UI', sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app {
+  position: relative;
+  height: 100%;
+  /* The window itself must never scroll; only .content does. */
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.app {
+  --on-phase: var(--on-focus);
+}
+.app[data-phase='shortBreak'] {
+  --phase: var(--short-break);
+  --on-phase: var(--on-short-break);
+}
+.app[data-phase='longBreak'] {
+  --phase: var(--long-break);
+  --on-phase: var(--on-long-break);
+}
+
+/* ---------- Aurora background ---------- */
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/*
+ * Blobs are a third of their visible size and Aurora.tsx scales them 3× (and drifts them),
+ * so each blob's centre matches the old 90vmax layout while using far less GPU memory.
+ */
+.aurora-blob {
+  position: absolute;
+  width: 30vmax;
+  height: 30vmax;
+  border-radius: 50%;
+  -webkit-mask-image: radial-gradient(
+    closest-side,
+    #000 0%,
+    rgba(0, 0, 0, 0.5) 45%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(closest-side, #000 0%, rgba(0, 0, 0, 0.5) 45%, transparent 100%);
+  transform: scale(3);
+  will-change: transform;
+  transition: background-color var(--color-fade);
+}
+
+.aurora-phase {
+  top: -15vmax;
+  left: 0;
+  background-color: var(--phase);
+  opacity: 0.5;
+}
+
+.aurora-a {
+  bottom: -20vmax;
+  right: -10vmax;
+  background-color: var(--aurora-a);
+  opacity: 0.55;
+}
+
+.aurora-b {
+  top: calc(10% + 30vmax);
+  right: -25vmax;
+  background-color: var(--aurora-b);
+  opacity: 0.42;
+}
+
+/* Darkens the edges so text in the middle always sits on a calm background. */
+.aurora-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 0%, var(--bg) 95%);
+  opacity: 0.55;
+}
+
+/* ---------- Title bar ---------- */
+
+/* Brand (or a back button) on the left; page icons and window buttons on the right. */
+.titlebar {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 18px;
+  -webkit-app-region: drag;
+}
+
+.titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand-mark {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid var(--phase);
+  border-right-color: transparent;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 12px var(--phase);
+  transition:
+    border-color var(--color-fade),
+    box-shadow var(--color-fade);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background-color 0.2s;
+}
+.back-btn svg {
+  color: var(--text-muted);
+  transition: transform 0.2s var(--ease-out);
+}
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+.back-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+.titlebar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color 0.25s,
+    background-color 0.3s,
+    box-shadow 0.3s;
+}
+.nav-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.07);
+}
+/* The open page glows in the current phase color, like the ring and the hourglass. */
+.nav-btn.active {
+  color: var(--phase);
+  background: color-mix(in srgb, var(--phase) 16%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--phase) 40%, transparent),
+    0 0 14px -4px var(--phase);
+}
+
+.titlebar-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.titlebar-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.titlebar-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+.titlebar-close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+/* ---------- Content ---------- */
+
+.content > * {
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.content::-webkit-scrollbar {
+  width: 10px;
+}
+.content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* ---------- Timer ---------- */
+
+.timer-view {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding-bottom: 8px;
+}
+
+.phase-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.phase-label.large {
+  font-size: 22px;
+  gap: 10px;
+}
+.phase-label.paused {
+  animation: blink 1.6s ease-in-out infinite;
+}
+.phase-label-paused {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.phase-label-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--phase);
+  box-shadow: 0 0 10px var(--phase);
+  transition:
+    background-color var(--color-fade),
+    box-shadow var(--color-fade);
+}
+.phase-label.large .phase-label-dot {
+  width: 10px;
+  height: 10px;
+}
+
+/* Inside the ring: phase name on top, clock dead center, round dots below. */
+.ring-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ring-top {
+  top: 26%;
+}
+.ring-center {
+  top: 0;
+  bottom: 0;
+}
+.ring-bottom {
+  bottom: 26%;
+}
+
+.ring-wrap {
+  position: relative;
+  width: min(300px, 76vw);
+  aspect-ratio: 1;
+}
+
+.ring {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.ring-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ring-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+}
+
+.ring-arc {
+  fill: none;
+  stroke: var(--phase);
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px var(--phase))
+    drop-shadow(0 0 22px color-mix(in srgb, var(--phase) 55%, transparent));
+  transition: stroke var(--color-fade);
+}
+
+.ring-knob {
+  fill: #fff;
+  stroke: var(--phase);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 6px var(--phase));
+  transition: stroke var(--color-fade);
+}
+
+.ring-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.clock {
+  display: flex;
+  align-items: center;
+  font-family: var(--clock-font, inherit);
+  font-weight: var(--clock-weight, 300);
+  font-size: clamp(54px, 17vw, 72px);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.digit-slot {
+  display: inline-grid;
+  justify-items: center;
+  /* Fixed width per digit so fonts without tabular figures don't make the clock jitter. */
+  width: 0.62em;
+  overflow: hidden;
+  /* Room for the slide so digits aren't clipped mid-animation. */
+  padding: 0.05em 0;
+}
+.digit {
+  grid-area: 1 / 1;
+  display: block;
+}
+
+.clock-colon {
+  margin: 0 0.02em;
+  padding-bottom: 0.08em;
+  opacity: 0.55;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ---------- Hourglass ---------- */
+
+.hourglass {
+  position: relative;
+  width: min(176px, 40vw);
+  aspect-ratio: 200 / 310;
+  /* Shares --resize with .clock-collapse so growing and collapsing move as one. */
+  transition: width var(--resize);
+}
+.clock-hidden .hourglass {
+  width: min(228px, 52vw);
+}
+/* Soft colored glow behind the glass. */
+.hourglass::before {
+  content: '';
+  position: absolute;
+  inset: 12% -10%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--phase) 32%, transparent),
+    transparent
+  );
+  filter: blur(18px);
+  z-index: -1;
+  transition: background var(--color-fade);
+}
+.hourglass-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* The grain and front layers cover the back one exactly, which sets the box's size. */
+.hourglass-layer {
+  position: absolute;
+  inset: 0;
+}
+.hourglass-grains-layer {
+  will-change: transform;
+}
+.hourglass-glass-thick {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 7;
+}
+.hourglass-outline {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.34);
+  stroke-width: 1.6;
+}
+.hourglass-shine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.hourglass-shine-dot {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.hourglass-shine-faint {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.hourglass-cap-edge {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
+}
+.hourglass-sand {
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--phase) 55%, transparent));
+}
+.hourglass-sand-edge {
+  fill: none;
+  stroke: color-mix(in srgb, var(--phase) 50%, white);
+  stroke-width: 1.2;
+  stroke-opacity: 0.7;
+}
+.hourglass-stream {
+  fill: color-mix(in srgb, var(--phase) 85%, white);
+  transition: opacity 0.3s;
+}
+.hourglass-grains {
+  fill: color-mix(in srgb, var(--phase) 80%, white);
+  transition: opacity 0.3s;
+}
+
+.hourglass-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hourglass-info .hourglass-meta {
+  margin-top: 8px;
+}
+
+/* Collapses the clock's height smoothly (0fr ↔ 1fr) while it fades and blurs out. */
+.clock-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows var(--resize),
+    opacity var(--resize),
+    filter var(--resize),
+    transform var(--resize);
+}
+.clock-collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.clock-hidden .clock-collapse {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  filter: blur(8px);
+  transform: scale(0.9);
+}
+.hourglass-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.timer-hourglass {
+  gap: 16px;
+}
+
+.pulse-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pulse-ring {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 2px solid var(--phase);
+  box-shadow:
+    0 0 24px var(--phase),
+    inset 0 0 24px color-mix(in srgb, var(--phase) 40%, transparent);
+}
+
+.round-dots {
+  display: flex;
+  gap: 8px;
+  min-height: 10px;
+  align-items: center;
+}
+.round-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  transition:
+    background-color 0.4s,
+    box-shadow 0.4s;
+}
+.round-dot.done {
+  background: var(--focus);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--focus) 70%, transparent);
+}
+.round-dot.current {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--focus);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+/* Small secondary buttons at both ends of the control row. */
+.ghost-btn {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+.ghost-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.07);
+}
+.ghost-btn.active {
+  color: var(--phase);
+}
+.ghost-text {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.icon-btn:hover {
+  border-color: color-mix(in srgb, var(--phase) 55%, transparent);
+}
+
+.play-btn {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--phase);
+  color: var(--on-phase);
+  cursor: pointer;
+  box-shadow:
+    0 10px 30px -8px var(--phase),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition:
+    background-color var(--color-fade),
+    box-shadow var(--color-fade);
+}
+.play-btn-icon {
+  display: grid;
+  place-items: center;
+  grid-area: 1 / 1;
+}
+.play-btn-icon svg {
+  /* Optical centering for the play triangle. */
+  margin-left: 2px;
+}
+
+/* ---------- Coming soon ---------- */
+
+.coming-soon {
+  margin-top: 40px;
+  padding: 36px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.coming-soon-icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--phase) 16%, transparent);
+  color: var(--phase);
+  margin-bottom: 6px;
+}
+.coming-soon h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.coming-soon p {
+  margin: 0;
+  max-width: 280px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.coming-soon-badge {
+  margin-top: 10px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ---------- Settings ---------- */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-section {
+  padding: 14px 16px 8px;
+}
+.settings-section h2 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.setting-row + .setting-row {
+  border-top: 1px solid var(--border);
+}
+
+.setting-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+.setting-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.setting-unit {
+  width: 28px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.stepper input {
+  width: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  user-select: text;
+  -moz-appearance: textfield;
+}
+.stepper input::-webkit-inner-spin-button,
+.stepper input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+.stepper-btn {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.stepper-btn:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.stepper-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.switch-row {
+  /* Keeps the hidden checkbox inside its row; otherwise focusing it scrolls the whole page. */
+  position: relative;
+  cursor: pointer;
+}
+.switch-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.switch {
+  flex: none;
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  display: flex;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background-color 0.25s;
+}
+.switch.on {
+  justify-content: flex-end;
+  background: var(--accent);
+}
+.switch-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+.switch-input:focus-visible + .switch {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 4px 0 10px;
+}
+.theme-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.theme-swatch.selected {
+  color: var(--text);
+}
+.theme-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.theme-swatch.selected .theme-preview {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.theme-preview-dot {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.accent-label {
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+.accent-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 8px;
+}
+.accent-auto {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+.accent-auto.selected {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--accent-soft);
+}
+.accent-swatch,
+.accent-custom {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 0;
+  color: #0b0d14;
+  cursor: pointer;
+}
+.accent-swatch.selected {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px currentColor;
+  color: #0b0d14;
+}
+.accent-custom {
+  position: relative;
+  background-image: conic-gradient(#ff6b81, #ffd166, #8bd46a, #38bdf8, #c084fc, #ff6b81) !important;
+  color: #fff;
+}
+.accent-custom input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.accent-custom svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  pointer-events: none;
+}
+
+.option-label {
+  margin: 10px 0 8px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+.option-label:first-of-type {
+  margin-top: 2px;
+}
+
+.style-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.font-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.option-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+.option-card.selected {
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.style-preview {
+  width: 44px;
+  height: 44px;
+}
+.font-sample {
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.phase-color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+}
+.phase-color-name {
+  width: 52px;
+  flex: none;
+  font-size: 13.5px;
+}
+.swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.swatch {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #0b0d14;
+  cursor: pointer;
+}
+.swatch.selected {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--text);
+}
+.swatch-custom {
+  background: conic-gradient(#ff6b81, #ffd166, #8bd46a, #38bdf8, #c084fc, #ff6b81);
+  color: #fff;
+}
+.swatch-custom input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.swatch-custom svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  pointer-events: none;
+}
+
+.text-btn {
+  margin: 6px 0 4px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.text-btn:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Reduced motion ---------- */
+
+:root[data-reduce-motion] .phase-label.paused {
+  animation: none;
+}
+:root[data-reduce-motion] .hourglass-grains {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-label.paused {
+    animation: none;
+  }
+  .hourglass-grains {
+    display: none;
+  }
+}
