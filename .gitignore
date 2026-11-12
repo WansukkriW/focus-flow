@@ -8,3 +8,6 @@ out
 # local tooling notes
 CLAUDE.md
 .claude/
+
+# requirements doc (not published)
+spec.md

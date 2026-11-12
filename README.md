@@ -4,6 +4,10 @@
 
 **Pomodoro คืออะไร?** ทำงานแบบโฟกัส 25 นาที แล้วพัก 5 นาที ทำครบ 4 รอบได้พักยาว ช่วยให้ทำงานได้นานโดยไม่ล้า
 
+| จับเวลา | รายการงาน | สถิติ | ตั้งค่า |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/timer.png" width="200" alt="หน้าจับเวลา"> | <img src="docs/screenshots/tasks.png" width="200" alt="หน้ารายการงาน"> | <img src="docs/screenshots/stats.png" width="200" alt="หน้าสถิติ"> | <img src="docs/screenshots/settings.png" width="200" alt="หน้าตั้งค่า"> |
+
 ## ดาวน์โหลด
 
 1. ไปที่หน้า [**Releases**](../../releases/latest) แล้วโหลดไฟล์ `Focus.Flow.Setup.x.x.x.exe`
@@ -45,6 +49,6 @@ npm run dev        # รันแบบพัฒนา
 npm run build:win  # สร้างไฟล์ติดตั้ง → dist/
 ```
 
-สร้างด้วย Electron + React + TypeScript ดูรายละเอียดความต้องการทั้งหมดได้ที่ [spec.md](spec.md)
+สร้างด้วย Electron + React + TypeScript
 
 เจอบั๊กหรือมีไอเดีย เปิด [Issues](../../issues) ได้เลย
