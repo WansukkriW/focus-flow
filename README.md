@@ -4,7 +4,7 @@
 
 **Pomodoro คืออะไร?** ทำงานแบบโฟกัส 25 นาที แล้วพัก 5 นาที ทำครบ 4 รอบได้พักยาว ช่วยให้ทำงานได้นานโดยไม่ล้า
 
-<p align="center"><img src="docs/screenshots/timer.png" width="320" alt="หน้าจับเวลาแบบนาฬิกาทราย"></p>
+<p align="center"><img src="docs/screenshots/focus-flow-hourglass.png" width="320" alt="หน้าจับเวลาแบบนาฬิกาทราย"></p>
 
 ## ดาวน์โหลด
 
