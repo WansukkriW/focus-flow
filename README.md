@@ -58,3 +58,7 @@ npm run build:win  # สร้างไฟล์ติดตั้ง → dist/
 สร้างด้วย Electron + React + TypeScript
 
 เจอบั๊กหรือมีไอเดีย เปิด [Issues](../../issues) ได้เลย
+
+---
+
+พัฒนาโดย [@WansukkriW](https://github.com/WansukkriW)
